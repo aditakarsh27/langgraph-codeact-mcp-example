@@ -134,7 +134,7 @@ await execute()
             output = (
                 response.stdout if response.stdout else "<Code ran, no output printed to stdout>"
             )
-            result = response.result
+            result = response.result or {}
 
             # If there was an error in the result, return it
             if isinstance(result, dict) and "error" in result:

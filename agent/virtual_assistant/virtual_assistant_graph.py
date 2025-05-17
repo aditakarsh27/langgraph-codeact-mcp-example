@@ -93,10 +93,19 @@ def create_virtual_assistant_graph():
                 log.warning("No langchain tools were created from filtered MCP tools")
             
             if approach == 'react':
+                react_prompt = "You are a helpful assistant."
+                react_model = model
+                if LLM_PROVIDER == "openai":
+                    react_prompt += """
+Important: Do not ask whether to proceed with using tools - just proceed directly with calling the appropriate tools.
+Use the tools that best address the task based on available information. Make reasonable assumptions when needed.
+"""
+                    react_model = model.bind_tools(langchain_tools, parallel_tool_calls=False)
                 # Create React agent
                 react_agent = create_react_agent(
-                    model=model,
+                    model=react_model,
                     tools=langchain_tools,
+                    prompt=react_prompt
                 )
                 inner_graph = react_agent
             else:  # default to codeact

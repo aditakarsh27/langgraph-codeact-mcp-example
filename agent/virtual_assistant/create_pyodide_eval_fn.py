@@ -11,6 +11,21 @@ from fastmcp.tools import Tool as FastMCPTool
 
 sandbox = PyodideSandbox("./sessions", allow_net=True)
 
+def safe_repr(obj):
+    """Create a safe representation of objects, handling multiline strings."""
+    if isinstance(obj, str) and ('\n' in obj or '\r' in obj):
+        # Escape any triple quotes in the string
+        escaped = obj.replace("'''", r"\'\'\'")
+        return f"'''{escaped}'''"
+    elif isinstance(obj, dict):
+        items = [f"{repr(k)}: {safe_repr(v)}" for k, v in obj.items()]
+        return "{" + ", ".join(items) + "}"
+    elif isinstance(obj, list):
+        items = [safe_repr(item) for item in obj]
+        return "[" + ", ".join(items) + "]"
+    else:
+        return repr(obj)
+
 def make_safe_function_name(name: str) -> str:
     """Convert a tool name to a valid Python function name."""
     # Replace non-alphanumeric characters with underscores
@@ -102,7 +117,7 @@ await execute()
                     src = inspect.getsource(value)
                     context_setup += f"\n{src}"
             else:
-                context_setup += f"\n{key} = {repr(value)}"
+                context_setup += f"\n{key} = {safe_repr(value)}"
 
         try:
             # Execute the code and get the result

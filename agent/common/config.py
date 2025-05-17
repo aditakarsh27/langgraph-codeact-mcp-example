@@ -12,3 +12,5 @@ GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
 # Controls whether tools are filtered based on conversation context
 # Currently overfitting to the last user message and doesn't think through - hence disabled
 ENABLE_TOOL_FILTERING = os.getenv("ENABLE_TOOL_FILTERING", "false").lower() == "true"
+
+GRAPH_RECURSION_LIMIT = int(os.environ.get("GRAPH_RECURSION_LIMIT", 25))

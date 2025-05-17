@@ -15,7 +15,7 @@ from pydantic import BaseModel, Field
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import BaseTool, StructuredTool
 import inspect
-from agent.common.config import LLM_PROVIDER, ENABLE_TOOL_FILTERING
+from agent.common.config import LLM_PROVIDER, ENABLE_TOOL_FILTERING, GRAPH_RECURSION_LIMIT
 from agent.virtual_assistant.convert_fastmcp_tool_to_langchain_tool import convert_fastmcp_tool_to_langchain_tool
 from agent.virtual_assistant.create_default_prompt import create_default_prompt
 from agent.virtual_assistant.create_reflection_prompt import create_reflection_prompt
@@ -134,7 +134,7 @@ Use the tools that best address the task based on available information. Make re
                 inner_graph = inner_graph.compile()
             
             # Invoke the inner graph with the current state
-            inner_result = await inner_graph.ainvoke(state)
+            inner_result = await inner_graph.ainvoke(state, {**config, "recursion_limit": GRAPH_RECURSION_LIMIT})
             return inner_result
     
     # Create the StateGraph

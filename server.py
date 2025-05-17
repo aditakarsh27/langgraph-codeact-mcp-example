@@ -28,13 +28,13 @@ def setup_mcp_proxy_servers():
     async def _run_proxy():
         # Define services with their configurations
         services = {
-            "firecrawl": {
-                "package": "firecrawl-mcp",
-                "args": [],
-                "env": {
-                    "FIRECRAWL_API_KEY": FIRECRAWL_API_KEY
-                }
-            },
+            # "firecrawl": {
+            #     "package": "firecrawl-mcp",
+            #     "args": [],
+            #     "env": {
+            #         "FIRECRAWL_API_KEY": FIRECRAWL_API_KEY
+            #     }
+            # },
             "notion": {
                 "package": "@notionhq/notion-mcp-server",
                 "args": [],

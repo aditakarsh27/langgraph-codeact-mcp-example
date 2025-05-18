@@ -22,7 +22,6 @@ The system uses FastMCP to provide the following capabilities:
 
 The system comes pre-configured with the following MCP services:
 
-- **Firecrawl** - For web search and data extraction
 - **Notion API** - For Notion database and page interactions
 - **Google Maps** - For location-based services and mapping
 
@@ -62,7 +61,7 @@ cp .env.example .env
 Update the `.env` file with your configuration values, including:
 
 - API keys for language models
-- MCP service API keys (FIRECRAWL_API_KEY, NOTION_TOKEN, GOOGLE_MAPS_API_KEY)
+- MCP service API keys (NOTION_TOKEN, GOOGLE_MAPS_API_KEY)
 - Agent behavior configurations
 
 ### Run the Application

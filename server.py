@@ -7,7 +7,6 @@ import asyncio
 import time
 
 from agent.common.config import (
-    FIRECRAWL_API_KEY,
     NOTION_TOKEN,
     GOOGLE_MAPS_API_KEY
 )
@@ -28,13 +27,6 @@ def setup_mcp_proxy_servers():
     async def _run_proxy():
         # Define services with their configurations
         services = {
-            # "firecrawl": {
-            #     "package": "firecrawl-mcp",
-            #     "args": [],
-            #     "env": {
-            #         "FIRECRAWL_API_KEY": FIRECRAWL_API_KEY
-            #     }
-            # },
             "notion": {
                 "package": "@notionhq/notion-mcp-server",
                 "args": [],

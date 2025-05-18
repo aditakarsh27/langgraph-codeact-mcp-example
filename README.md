@@ -67,6 +67,12 @@ Update the `.env` file with your configuration values, including:
 
 ### Run the Application
 
+Start the MCP server:
+
+```bash
+poetry run python -m dotenv run python server.py
+```
+
 Start the LangGraph server:
 
 ```bash

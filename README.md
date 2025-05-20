@@ -2,7 +2,8 @@
 
 A powerful, cost-efficient virtual assistant built with LangGraph, LangChain, and Model Context Protocol (MCP) that demonstrates how to efficiently process large tasks through code generation.
 
-[Video demonstration link will be added soon]
+## Video Overview
+[![Video Overview](https://img.youtube.com/vi/e5MV23koc-0/0.jpg)](https://www.youtube.com/watch?v=e5MV23koc-0)
 
 ## Key Benefits
 

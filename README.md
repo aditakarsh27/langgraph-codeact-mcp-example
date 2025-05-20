@@ -2,39 +2,6 @@
 
 A modular, extensible virtual assistant built with Python, LangGraph, and LangChain that implements the Model Context Protocol (MCP) for managing and executing tasks through specialized agents.
 
-## Architecture Overview
-
-The Virtual Assistant Agent uses a supervisor-based workflow architecture with two main components:
-
-1. **FastMCP Proxy Server** - Manages multiple MCP services through a unified SSE endpoint
-2. **Task Executor Agent** - Handles task execution using appropriate MCP tools
-
-### MCP Server Management
-
-The system uses FastMCP to provide the following capabilities:
-
-- **Composite Server Architecture** - Multiple MCP services are mounted on a single FastMCP server
-- **Server-Side Events (SSE) Transport** - All MCP services are exposed through a unified SSE endpoint
-- **Dynamic Tool Discovery** - Tools are automatically discovered and converted to LangChain-compatible format
-- **Code Execution Environment** - Enables Python code execution in a sandboxed environment with access to MCP tools
-
-### Supported MCP Services
-
-The system comes pre-configured with the following MCP services:
-
-- **Notion API** - For Notion database and page interactions
-- **Google Maps** - For location-based services and mapping
-
-### Task Execution
-
-The Task Executor intelligently processes user requests by:
-
-- Analyzing conversation context to select appropriate approach (CodeAct or React)
-- Connecting to the FastMCP proxy server through SSE transport
-- Dynamically accessing tools from all mounted MCP services
-- Executing tasks using Python code (CodeAct) or structured reasoning (React)
-- Generating responses based on tool outputs
-
 ## Project Setup
 
 Clone the repository:
@@ -77,6 +44,39 @@ Start the LangGraph server:
 ```bash
 poetry run python -m dotenv run langgraph dev
 ```
+
+## Architecture Overview
+
+The Virtual Assistant Agent uses a supervisor-based workflow architecture with two main components:
+
+1. **FastMCP Proxy Server** - Manages multiple MCP services through a unified SSE endpoint
+2. **Task Executor Agent** - Handles task execution using appropriate MCP tools
+
+### MCP Server Management
+
+The system uses FastMCP to provide the following capabilities:
+
+- **Composite Server Architecture** - Multiple MCP services are mounted on a single FastMCP server
+- **Server-Side Events (SSE) Transport** - All MCP services are exposed through a unified SSE endpoint
+- **Dynamic Tool Discovery** - Tools are automatically discovered and converted to LangChain-compatible format
+- **Code Execution Environment** - Enables Python code execution in a sandboxed environment with access to MCP tools
+
+### Supported MCP Services
+
+The system comes pre-configured with the following MCP services:
+
+- **Notion API** - For Notion database and page interactions
+- **Google Maps** - For location-based services and mapping
+
+### Task Execution
+
+The Task Executor intelligently processes user requests by:
+
+- Analyzing conversation context to select appropriate approach (CodeAct or React)
+- Connecting to the FastMCP proxy server through SSE transport
+- Dynamically accessing tools from all mounted MCP services
+- Executing tasks using Python code (CodeAct) or structured reasoning (React)
+- Generating responses based on tool outputs
 
 ## Extending the System
 

@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "virtual-assistant-agent"
+name = "langgraph-codeact-mcp-example"
 version = "0.1.0"
-description = "Virtual Assistant Agent using LangGraph"
+description = "A powerful, cost-efficient virtual assistant built with LangGraph, LangChain, and Model Context Protocol (MCP)"
 authors = ["Nikita Sviridenko <nikita.sviridenko@voypost.com>"]
 packages = [
     { include = "agent" },

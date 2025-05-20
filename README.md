@@ -1,14 +1,23 @@
-# Virtual Assistant Agent
+# 🚀 LangGraph CodeAct MCP Example
 
-A modular, extensible virtual assistant built with Python, LangGraph, and LangChain that implements the Model Context Protocol (MCP) for managing and executing tasks through specialized agents.
+A powerful, cost-efficient virtual assistant built with LangGraph, LangChain, and Model Context Protocol (MCP) that demonstrates how to efficiently process large tasks through code generation.
+
+[Video demonstration link will be added soon]
+
+## Key Benefits
+
+- **LLM Cost Reduction** - CodeAct approach generates and executes code instead of calling tools one by one, dramatically reducing token usage
+- **Reliable Task Execution** - Handles complex tasks requiring hundreds of actions with minimal supervision
+- **Context Persistence** - Maintains variable state between interactions, enabling multi-step processes without regenerating data
+- **Safe Code Execution** - Uses PyodideSandbox for secure Python execution in a controlled environment
 
 ## Project Setup
 
 Clone the repository:
 
 ```bash
-git clone <repository-url>
-cd virtual-assistant-agent
+git clone https://github.com/n-sviridenko/langgraph-codeact-mcp-example
+cd langgraph-codeact-mcp-example
 ```
 
 Install dependencies:
@@ -17,83 +26,66 @@ Install dependencies:
 poetry install
 ```
 
-### Environment Configuration
-
-Create a `.env` file in the project root:
+Create a `.env` file and update with your API keys:
 
 ```bash
 cp .env.example .env
 ```
 
-Update the `.env` file with your configuration values, including:
-
-- API keys for language models
-- MCP service API keys (NOTION_TOKEN, GOOGLE_MAPS_API_KEY)
-- Agent behavior configurations
-
-### Run the Application
-
-Start the MCP server:
+Run the application:
 
 ```bash
+# Start MCP server
 poetry run python -m dotenv run python server.py
-```
 
-Start the LangGraph server:
-
-```bash
+# Start LangGraph server
 poetry run python -m dotenv run langgraph dev
 ```
 
 ## Architecture Overview
 
-The Virtual Assistant Agent uses a supervisor-based workflow architecture with two main components:
+The system consists of two main components:
 
-1. **FastMCP Proxy Server** - Manages multiple MCP services through a unified SSE endpoint
-2. **Task Executor Agent** - Handles task execution using appropriate MCP tools
+1. **Composite MCP Server** - Aggregates multiple MCP services through a unified SSE endpoint
+2. **Virtual Assistant Graph** - Implements both CodeAct and ReAct approaches with dynamic selection
 
-### MCP Server Management
+### CodeAct vs ReAct Approach
 
-The system uses FastMCP to provide the following capabilities:
+- **ReAct Approach** - Traditional agent pattern that calls tools one by one
+  - Higher cost due to growing context window
+  - Can be unreliable for large tasks due to potential early termination
 
-- **Composite Server Architecture** - Multiple MCP services are mounted on a single FastMCP server
-- **Server-Side Events (SSE) Transport** - All MCP services are exposed through a unified SSE endpoint
-- **Dynamic Tool Discovery** - Tools are automatically discovered and converted to LangChain-compatible format
-- **Code Execution Environment** - Enables Python code execution in a sandboxed environment with access to MCP tools
+- **CodeAct Approach** - Agent generates Python code that executes tools programmatically
+  - Dramatically reduces token usage by replacing multiple tool calls with code
+  - More deterministic behavior with loops and error handling
+  - Maintains variable state between executions
+  - Uses Claude for reflection and code validation
 
-### Supported MCP Services
+### System Components
 
-The system comes pre-configured with the following MCP services:
+- **MCP Server** - Composite FastMCP server that mounts multiple services under a single endpoint
+  - Exposes tools through Server-Sent Events (SSE) protocol
+  - Enables secure access from PyodideSandbox environment
 
-- **Notion API** - For Notion database and page interactions
-- **Google Maps** - For location-based services and mapping
+- **Code Execution Environment** - PyodideSandbox WebAssembly-based Python runtime
+  - Maintains variable state using thread-based sessions
+  - Auto-generates Python function bindings for all MCP tools
 
-### Task Execution
-
-The Task Executor intelligently processes user requests by:
-
-- Analyzing conversation context to select appropriate approach (CodeAct or React)
-- Connecting to the FastMCP proxy server through SSE transport
-- Dynamically accessing tools from all mounted MCP services
-- Executing tasks using Python code (CodeAct) or structured reasoning (React)
-- Generating responses based on tool outputs
+- **Virtual Assistant Graph**
+  - Dynamically selects between CodeAct and ReAct based on task
+  - Optional tool filtering for specific tasks
+  - Pre-configured with Notion API and Google Maps services
 
 ## Extending the System
 
-The Virtual Assistant can be extended with new capabilities by adding additional MCP services to the FastMCP composite server. To add a new service:
-
-1. Add the service configuration to the `services` dictionary in `setup_mcp_proxy_servers` function
-2. Install any necessary NPM packages for the MCP service
-3. Add appropriate environment variables for API keys and configuration
-
-Example of adding a new service:
+Add new MCP services to the `services` dictionary in `setup_mcp_proxy_servers` function:
 
 ```python
 services = {
     # ... existing services
     "new_service": {
-        "script_path": "npx",
-        "args": ["-y", "new-service-mcp"],
+        "package": "@package/new-service-mcp",
+        "args": [],
         "env": {
             "NEW_SERVICE_API_KEY": os.getenv("NEW_SERVICE_API_KEY", "")
         }
@@ -101,4 +93,8 @@ services = {
 }
 ```
 
-No additional code changes are needed as the system will automatically discover and expose tools from the new service.
+## Limitations
+
+- **Container Persistence** - Session data is lost when containers are restarted in cloud environments
+- **Potential Hallucinations** - LLMs may occasionally print full data structures despite prompting
+- **Rate Limiting** - External API constraints may require custom handling for large datasets

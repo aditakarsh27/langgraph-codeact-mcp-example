@@ -27,6 +27,17 @@ def setup_mcp_proxy_servers():
     async def _run_proxy():
         # Define services with their configurations
         services = {
+            # "composio":{
+            #     "package": "@composio/mcp",
+            #     "args": [
+            #         "https://mcp.composio.dev/composio/server/498e7426-b62b-481d-98ba-f1aaef7f00a3/mcp?include_composio_helper_actions=true&agent=cursor",
+            #         "codeact",
+            #         "--client",
+            #         "cursor"
+            #     ],
+            #     "env": {}
+            # }
+
             "notion": {
                 "package": "@notionhq/notion-mcp-server",
                 "args": [],
@@ -37,13 +48,13 @@ def setup_mcp_proxy_servers():
                     })
                 }
             },
-            "google-maps": {
-                "package": "@modelcontextprotocol/server-google-maps",
-                "args": [],
-                "env": {
-                    "GOOGLE_MAPS_API_KEY": GOOGLE_MAPS_API_KEY
-                }
-            }
+            # "google-maps": {
+            #     "package": "@modelcontextprotocol/server-google-maps",
+            #     "args": [],
+            #     "env": {
+            #         "GOOGLE_MAPS_API_KEY": GOOGLE_MAPS_API_KEY
+            #     }
+            # }
         }
         
         # Initialize each service and mount to the composite server

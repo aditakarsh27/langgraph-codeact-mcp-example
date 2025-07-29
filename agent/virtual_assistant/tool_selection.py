@@ -5,7 +5,6 @@ from langchain_core.messages import BaseMessage
 from langchain_core.tools import BaseTool, StructuredTool
 import structlog
 from agent.common.llms import get_reflection_model
-from fastmcp.tools import Tool as FastMCPTool
 from agent.common.llm_guard import sanitize_json_output
 
 logger = structlog.get_logger()
@@ -30,19 +29,19 @@ def format_messages_as_json(messages: List[BaseMessage]) -> str:
 
 async def select_relevant_tools(
     messages: List[BaseMessage],
-    available_tools: List[FastMCPTool],
+    available_tools: List[Any],
     max_tools: int = 15
-) -> List[FastMCPTool]:
+) -> List[Any]:
     """
     Select relevant tools based on the conversation history and user intent.
     
     Args:
         messages: The conversation history between user and assistant
-        available_tools: List of all available MCP tools
+        available_tools: List of all available Composio tools
         max_tools: Maximum number of tools to select (default: 15)
         
     Returns:
-        List of selected MCP tools relevant to the conversation
+        List of selected Composio tools relevant to the conversation
     """
     log = logger.bind()
     
@@ -58,7 +57,19 @@ async def select_relevant_tools(
     reflection_model = get_reflection_model()
     
     # Create a summary of available tools
-    tool_descriptions = [{"name": tool.name, "description": tool.description, "input_schema": tool.inputSchema} for tool in available_tools]
+    tool_descriptions = []
+    for tool in available_tools:
+        # Composio tools are dictionaries
+        tool_name = tool.name
+        tool_description = tool.description
+        tool_parameters = tool.args_schema.model_json_schema()
+        
+        tool_info = {
+            "name": tool_name,
+            "description": tool_description,
+            "input_schema": tool_parameters
+        }
+        tool_descriptions.append(tool_info)
     
     # We only include the last 5 messages to keep the context manageable
     recent_messages = messages[-5:]

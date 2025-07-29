@@ -1,6 +1,6 @@
-# 🚀 LangGraph CodeAct MCP Example
+# 🚀 LangGraph CodeAct Composio Example
 
-A powerful, cost-efficient virtual assistant built with LangGraph, LangChain, and Model Context Protocol (MCP) that demonstrates how to efficiently process large tasks through code generation.
+A powerful, cost-efficient virtual assistant built with LangGraph, LangChain, and Composio that demonstrates how to efficiently process large tasks through code generation.
 
 ## Video Overview
 [![Video Overview](https://img.youtube.com/vi/e5MV23koc-0/0.jpg)](https://www.youtube.com/watch?v=e5MV23koc-0)
@@ -36,9 +36,6 @@ cp .env.example .env
 Run the application:
 
 ```bash
-# Start MCP server
-poetry run python -m dotenv run python server.py
-
 # Start LangGraph server
 poetry run python -m dotenv run langgraph dev
 ```
@@ -47,7 +44,7 @@ poetry run python -m dotenv run langgraph dev
 
 The system consists of two main components:
 
-1. **Composite MCP Server** - Aggregates multiple MCP services through a unified SSE endpoint
+1. **Composio Integration** - Provides authenticated access to external services like Gmail, Notion, GitHub, etc.
 2. **Virtual Assistant Graph** - Implements both CodeAct and ReAct approaches with dynamic selection
 
 ### CodeAct vs ReAct Approach
@@ -64,35 +61,42 @@ The system consists of two main components:
 
 ### System Components
 
-- **MCP Server** - Composite FastMCP server that mounts multiple services under a single endpoint
-  - Exposes tools through Server-Sent Events (SSE) protocol
-  - Enables secure access from PyodideSandbox environment
+- **Composio Integration** - Provides authenticated access to external services
+  - Supports Gmail, Notion, GitHub, Slack, and other services
+  - Automatic tool discovery and authentication
+  - Seamless integration with PyodideSandbox environment
 
 - **Code Execution Environment** - PyodideSandbox WebAssembly-based Python runtime
   - Maintains variable state using thread-based sessions
-  - Auto-generates Python function bindings for all MCP tools
+  - Auto-generates Python function bindings for all Composio tools
 
 - **Virtual Assistant Graph**
   - Dynamically selects between CodeAct and ReAct based on task
   - Optional tool filtering for specific tasks
-  - Pre-configured with Notion API and Google Maps services
+  - **Composio Integration** - Supports authenticated tools from Gmail, Notion, GitHub, and other services
 
 ## Extending the System
 
-Add new MCP services to the `services` dictionary in `setup_mcp_proxy_servers` function:
+### Composio Integration
 
-```python
-services = {
-    # ... existing services
-    "new_service": {
-        "package": "@package/new-service-mcp",
-        "args": [],
-        "env": {
-            "NEW_SERVICE_API_KEY": os.getenv("NEW_SERVICE_API_KEY", "")
-        }
-    }
-}
-```
+The system uses Composio for authenticated access to external services. To configure Composio tools:
+
+1. **Install Composio**: The project includes Composio dependencies in `pyproject.toml`
+2. **Configure Environment**: Set the following environment variables:
+   ```bash
+   ENABLE_COMPOSIO_TOOLS=true
+   COMPOSIO_USER_ID=your_user_id
+   COMPOSIO_TOOLKITS=GMAIL,GITHUB,NOTION
+   COMPOSIO_SEARCH_TERM=your_search_term
+   ```
+3. **Authenticate Services**: Use Composio's authentication flow to connect to services like Gmail, Notion, GitHub, etc.
+4. **Access Tools**: Composio tools are automatically available as Python functions in the CodeAct environment
+
+Composio tools are automatically converted to Python functions and made available in the PyodideSandbox execution environment, allowing the agent to use authenticated APIs directly in generated code.
+
+### Adding New Services
+
+To add new Composio services, simply update the `COMPOSIO_TOOLKITS` environment variable with the desired service names. Available toolkits include GMAIL, GITHUB, NOTION, SLACK, and others supported by Composio.
 
 ## Limitations
 

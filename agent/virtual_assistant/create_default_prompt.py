@@ -1,11 +1,11 @@
 from langchain_core.tools import StructuredTool
 from langchain_core.tools import tool as create_tool
-from agent.common.config import LLM_PROVIDER
-from agent.virtual_assistant.create_pyodide_eval_fn import make_safe_function_name
+from agent.common.config import LLM_PROVIDER, ENABLE_COMPOSIO_TOOLS, COMPOSIO_USER_ID, ENABLE_TOOL_FILTERING
+from agent.virtual_assistant.create_pyodide_eval_fn import make_safe_function_name, create_composio_prompt_functions
 from typing import Optional
 import inspect
 
-def create_default_prompt(tools: list[StructuredTool], base_prompt: Optional[str] = None):
+def create_default_prompt(tools: list[StructuredTool], base_prompt: Optional[str] = None, search_term: str = ""):
     """Create default prompt for the CodeAct agent."""
     tools = [t if isinstance(t, StructuredTool) else create_tool(t) for t in tools]
     prompt = f"{base_prompt}\n\n" if base_prompt else ""
@@ -25,6 +25,7 @@ Write the code that best addresses the task based on available information. Make
 In addition to the Python Standard Library, you can use the following functions:
 """
 
+    # Add LangChain tools
     for tool in tools:
         # Use coroutine if it exists, otherwise use func
         tool_callable = tool.coroutine if hasattr(tool, "coroutine") and tool.coroutine is not None else tool.func
@@ -38,6 +39,16 @@ In addition to the Python Standard Library, you can use the following functions:
     """{tool.description}"""
     ...
 '''
+    
+    # Add Composio tools if enabled
+    if ENABLE_COMPOSIO_TOOLS and ENABLE_TOOL_FILTERING:
+        composio_functions = create_composio_prompt_functions(COMPOSIO_USER_ID, search_term)
+        if composio_functions:
+            prompt += f"""
+
+# Composio Tools (authenticated services like Gmail, Notion, GitHub, etc.)
+{composio_functions}
+"""
 
     prompt += """
 

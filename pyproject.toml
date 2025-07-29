@@ -8,7 +8,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.11.5,<3.12"
+python = ">=3.11.5,<=3.14"
 python-dotenv = "^1.1.0"
 langgraph = "^0.3.34"
 langchain-core = "^0.3.56"
@@ -19,10 +19,17 @@ jinja2 = "*"
 json-repair = "*"
 aiofiles = "*"
 fastmcp = "^2.3.4"
-langchain-sandbox = "^0.0.4"
+langchain-sandbox = "0.0.4"
 langchain-openai = "^0.3.17"
 openai = "^1.78.1"
 langgraph-codeact = {git = "https://github.com/n-sviridenko/langgraph-codeact.git", rev = "reflection-prompt"}
+composio-core = "^0.7.20"
+composio-langchain = "0.8.0"
+langchain = "^0.3.27"
+composio-anthropic = "^0.8.5"
+composio-langgraph = "^0.8.5"
+composio = "0.8.0"
+e2b-code-interpreter = "^1.5.2"
 
 [build-system]
 requires = ["poetry-core"]

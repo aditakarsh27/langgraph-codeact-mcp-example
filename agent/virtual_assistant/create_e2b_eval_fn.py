@@ -8,7 +8,7 @@ import structlog
 import aiofiles
 from langchain_core.messages import AIMessage
 from langgraph_codeact import EvalCoroutine
-from langchain_sandbox import PyodideSandbox
+from e2b_code_interpreter import Sandbox
 from langchain_core.tools import StructuredTool
 from agent.common.config import ENABLE_COMPOSIO_TOOLS, COMPOSIO_USER_ID, COMPOSIO_TOOLKITS, ENABLE_TOOL_FILTERING
 # Add Composio imports
@@ -27,14 +27,14 @@ logger = structlog.get_logger()
 sessions_dir = "./sessions"
 os.makedirs(sessions_dir, exist_ok=True)
 
-# Initialize PyodideSandbox with proper error handling
+# Initialize E2B Sandbox with proper error handling
 sandbox = None
 try:
-    logger.info("Initializing PyodideSandbox...")
-    sandbox = PyodideSandbox(sessions_dir, allow_net=True)
-    logger.info("PyodideSandbox initialized successfully")
+    logger.info("Initializing E2B Sandbox...")
+    sandbox = Sandbox(template='5pg2x2yuft3bg6q6wy73', envs={'COMPOSIO_API_KEY': os.getenv('COMPOSIO_API_KEY')})  # Using the template ID from e2b.toml
+    logger.info("E2B Sandbox initialized successfully")
 except Exception as e:
-    logger.error(f"Failed to initialize PyodideSandbox: {e}")
+    logger.error(f"Failed to initialize E2B Sandbox: {e}")
     logger.error(f"Error type: {type(e).__name__}")
     logger.error(f"Error details: {str(e)}")
     sandbox = None
@@ -130,12 +130,20 @@ def create_composio_tool_functions(user_id: str = "default", tools: list[Structu
                     elif param_type == 'object':
                         param_type = 'dict'
                     
-                    # Add default value if available
+                    # Check if parameter is required or has a default value
+                    is_required = param_name in required
                     default_value = param_info.get('default')
-                    if default_value is not None:
-                        optional_params.append(f"{param_name}: {param_type} = {safe_repr(default_value)}")
-                    else:
+                    
+                    if is_required and default_value is None:
+                        # Parameter is required and has no default
                         required_params.append(f"{param_name}: {param_type}")
+                    else:
+                        # Parameter is optional (either not in required list or has default)
+                        if default_value is not None:
+                            optional_params.append(f"{param_name}: {param_type} = {safe_repr(default_value)}")
+                        else:
+                            # Optional parameter without default - provide None as default
+                            optional_params.append(f"{param_name}: {param_type} = None")
                 
                 # Combine required parameters first, then optional parameters
                 param_list = required_params + optional_params
@@ -153,14 +161,11 @@ async def {safe_name}({param_str}):
     try:
         # Prepare arguments for the tool
         args = {{}}
-{chr(10).join(f'        args["{param}"] = {param}' for param in properties.keys())}
+{chr(10).join(f'        if {param} is not None:\n            args["{param}"] = {param}' for param in properties.keys())}
         
-        # Execute the tool via Composio
-        result = await composio.tools.execute(
-            user_id=user_id,
-            tool_name="{tool_name}",
-            arguments=args
-        )
+        # Get the tool and execute it
+        tool = composio.tools.get(user_id="default", tools=["{tool_name}"])[0]
+        result = tool.invoke(args)
         print(f"Composio tool {tool_name} executed successfully")
         return result
     except Exception as e:
@@ -265,12 +270,20 @@ def create_composio_prompt_functions(user_id: str = "default", tools: list[Struc
                     elif param_type == 'object':
                         param_type = 'dict'
                     
-                    # Add default value if available
+                    # Check if parameter is required or has a default value
+                    is_required = param_name in required
                     default_value = param_info.get('default')
-                    if default_value is not None:
-                        optional_params.append(f"{param_name}: {param_type} = {safe_repr(default_value)}")
-                    else:
+                    
+                    if is_required and default_value is None:
+                        # Parameter is required and has no default
                         required_params.append(f"{param_name}: {param_type}")
+                    else:
+                        # Parameter is optional (either not in required list or has default)
+                        if default_value is not None:
+                            optional_params.append(f"{param_name}: {param_type} = {safe_repr(default_value)}")
+                        else:
+                            # Optional parameter without default - provide None as default
+                            optional_params.append(f"{param_name}: {param_type} = None")
                 
                 # Combine required parameters first, then optional parameters
                 param_list = required_params + optional_params
@@ -304,21 +317,20 @@ async def {safe_name}({param_str}):
         logger.error(f"Failed to create Composio prompt functions: {e}")
         return ""
 
-def create_pyodide_eval_fn(
+def create_e2b_eval_fn(
     session_id: str | None = None,
     user_id: str = "default",
     tools: list[StructuredTool] | None = None
 ) -> EvalCoroutine:
-    """Create an eval_fn that uses PyodideSandbox.
+    """Create an eval_fn that uses E2B Sandbox.
 
     Args:
         session_id: ID of the session to use
-        sse_url: URL for SSE transport
-        mcp_tools: List of MCP tools to include
         user_id: User ID for Composio tools
+        tools: List of tools to include
 
     Returns:
-        A function that evaluates code using PyodideSandbox
+        A function that evaluates code using E2B Sandbox
     """
     
     async def async_eval_fn(code: str, _locals: dict[str, Any]) -> tuple[str, dict[str, Any]]:
@@ -375,8 +387,8 @@ await execute()
         try:
             # Check if sandbox is properly initialized
             if sandbox is None:
-                logger.error("PyodideSandbox is not initialized")
-                return "Error: PyodideSandbox is not properly initialized. Please check your environment setup and ensure langchain-sandbox is properly installed.", {}
+                logger.error("E2B Sandbox is not initialized")
+                return "Error: E2B Sandbox is not properly initialized. Please check your environment setup and ensure e2b-code-interpreter is properly installed.", {}
             logger.info(f"Executing code with session_id: {session_id}")
             
             # Execute the code and get the result
@@ -395,22 +407,47 @@ await execute()
             except Exception as e:
                 logger.error(f"Failed to save code to file: {e}")
             
-            response = await sandbox.execute(
-                code=full_code,
-                session_id=session_id
-            )
-            logger.info(f"Response: {response}")
-
+            # Execute code using E2B Sandbox
+            execution = sandbox.run_code(full_code)
+            logger.info(f"Execution completed: {execution}")
+            
             # Check if execution was successful
-            if response.stderr:
-                logger.error(f"PyodideSandbox stderr: {response.stderr}")
-                return f"Error during execution: {response.stderr}", {}
+            if execution.error:
+                logger.error(f"E2B Sandbox error: {execution.error}")
+                return f"Error during execution: {execution.error}", {}
 
-            # Get the output from stdout
-            output = (
-                response.stdout if response.stdout else "<Code ran, no output printed to stdout>"
-            )
-            result = response.result or {}
+            # Handle E2B structured output format
+            # E2B returns an object with stdout and stderr lists
+            stdout_output = ""
+            stderr_output = ""
+            
+            if hasattr(execution, 'stdout') and execution.stdout:
+                stdout_output = '\n'.join(execution.stdout)
+            
+            if hasattr(execution, 'stderr') and execution.stderr:
+                stderr_output = '\n'.join(execution.stderr)
+            
+            # Combine stdout and stderr for the main output
+            output = stdout_output
+            if stderr_output:
+                output += f"\n\nSTDERR:\n{stderr_output}"
+            
+            if not output:
+                output = f"<Code ran, no output printed to stdout> execution log: {execution}"
+            
+            # For E2B, we need to parse the result from the execution
+            # The result will be in the last line of the output if it's a return value
+            result = {}
+            try:
+                # Try to extract the result from the last line of output
+                lines = output.strip().split('\n')
+                if lines and lines[-1].startswith('{') and lines[-1].endswith('}'):
+                    result = json.loads(lines[-1])
+                else:
+                    # If no structured result, create a simple result dict
+                    result = {"output": output}
+            except (json.JSONDecodeError, IndexError):
+                result = {"output": output}
 
             # If there was an error in the result, return it
             if isinstance(result, dict) and "error" in result:
@@ -426,8 +463,11 @@ await execute()
             return output, new_vars
 
         except Exception as e:
-            logger.error(f"Exception during PyodideSandbox execution: {repr(e)}")
+            logger.error(f"Exception during E2B Sandbox execution: {repr(e)}")
             logger.error(f"Exception type: {type(e).__name__}")
-            return f"Error during PyodideSandbox execution: {repr(e)}", {}
+            return f"Error during E2B Sandbox execution: {repr(e)}", {}
 
     return async_eval_fn
+
+# Keep the old function name for backward compatibility
+create_pyodide_eval_fn = create_e2b_eval_fn 

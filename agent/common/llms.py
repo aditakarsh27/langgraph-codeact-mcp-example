@@ -58,7 +58,7 @@ def get_react_agent_model() -> RunnableSerializable:
         )
     elif LLM_PROVIDER == "anthropic":
         model = ChatAnthropic(
-            model="claude-3-7-sonnet-20250219",
+            model="claude-4-sonnet-20250514",
             temperature=0.0,
             max_tokens=8192,
             disable_streaming=True,
@@ -80,7 +80,7 @@ def get_reflection_model() -> RunnableSerializable:
         )
     elif REFLECTION_LLM_PROVIDER == "anthropic":
         model = ChatAnthropic(
-            model="claude-3-7-sonnet-20250219",
+            model="claude-4-sonnet-20250514",
             temperature=0.0,
             max_tokens=8192,
             disable_streaming=True,

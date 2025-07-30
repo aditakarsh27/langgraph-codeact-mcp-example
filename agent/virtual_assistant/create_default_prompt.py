@@ -1,7 +1,7 @@
 from langchain_core.tools import StructuredTool
 from langchain_core.tools import tool as create_tool
 from agent.common.config import LLM_PROVIDER, ENABLE_COMPOSIO_TOOLS, COMPOSIO_USER_ID, ENABLE_TOOL_FILTERING
-from agent.virtual_assistant.create_pyodide_eval_fn import make_safe_function_name, create_composio_prompt_functions
+from agent.virtual_assistant.create_e2b_eval_fn import make_safe_function_name, create_composio_prompt_functions
 from typing import Optional
 import inspect
 

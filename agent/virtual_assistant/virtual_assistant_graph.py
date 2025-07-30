@@ -5,7 +5,7 @@ from langgraph.graph import StateGraph, MessagesState
 from agent.common.llms import get_react_agent_model, get_reflection_model
 from langgraph_codeact import create_codeact
 from langchain_core.tools import tool as create_tool
-from agent.virtual_assistant.create_pyodide_eval_fn import create_pyodide_eval_fn, make_safe_function_name
+from agent.virtual_assistant.create_e2b_eval_fn import create_e2b_eval_fn, make_safe_function_name
 from langgraph.prebuilt import create_react_agent
 from langchain_core.messages import BaseMessage
 from pydantic import BaseModel, Field
@@ -164,7 +164,7 @@ Use the tools that best address the task based on available information. Make re
             user_id = config.get("metadata", {}).get("user_id", COMPOSIO_USER_ID)
             
             # Create sandbox eval function with session_id from thread_id
-            eval_fn = create_pyodide_eval_fn(
+            eval_fn = create_e2b_eval_fn(
                 # So that it remembers variables from previous runs
                 session_id=thread_id,
                 user_id=user_id,

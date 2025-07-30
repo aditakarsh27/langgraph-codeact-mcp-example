@@ -10,7 +10,7 @@ A powerful, cost-efficient virtual assistant built with LangGraph, LangChain, an
 - **LLM Cost Reduction** - CodeAct approach generates and executes code instead of calling tools one by one, dramatically reducing token usage
 - **Reliable Task Execution** - Handles complex tasks requiring hundreds of actions with minimal supervision
 - **Context Persistence** - Maintains variable state between interactions, enabling multi-step processes without regenerating data
-- **Safe Code Execution** - Uses PyodideSandbox for secure Python execution in a controlled environment
+- **Safe Code Execution** - Uses E2B Sandbox for secure Python execution in a controlled environment
 
 ## Project Setup
 
@@ -64,9 +64,9 @@ The system consists of two main components:
 - **Composio Integration** - Provides authenticated access to external services
   - Supports Gmail, Notion, GitHub, Slack, and other services
   - Automatic tool discovery and authentication
-  - Seamless integration with PyodideSandbox environment
+  - Seamless integration with E2B Sandbox environment
 
-- **Code Execution Environment** - PyodideSandbox WebAssembly-based Python runtime
+- **Code Execution Environment** - E2B Sandbox container-based Python runtime
   - Maintains variable state using thread-based sessions
   - Auto-generates Python function bindings for all Composio tools
 
@@ -92,7 +92,7 @@ The system uses Composio for authenticated access to external services. To confi
 3. **Authenticate Services**: Use Composio's authentication flow to connect to services like Gmail, Notion, GitHub, etc.
 4. **Access Tools**: Composio tools are automatically available as Python functions in the CodeAct environment
 
-Composio tools are automatically converted to Python functions and made available in the PyodideSandbox execution environment, allowing the agent to use authenticated APIs directly in generated code.
+Composio tools are automatically converted to Python functions and made available in the E2B Sandbox execution environment, allowing the agent to use authenticated APIs directly in generated code.
 
 ### Adding New Services
 

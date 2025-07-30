@@ -19,7 +19,6 @@ jinja2 = "*"
 json-repair = "*"
 aiofiles = "*"
 fastmcp = "^2.3.4"
-langchain-sandbox = "0.0.4"
 langchain-openai = "^0.3.17"
 openai = "^1.78.1"
 langgraph-codeact = {git = "https://github.com/n-sviridenko/langgraph-codeact.git", rev = "reflection-prompt"}
